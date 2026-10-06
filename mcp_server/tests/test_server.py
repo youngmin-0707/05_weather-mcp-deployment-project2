@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-import main
+from src import server as main
 
 
 def test_get_weather_uses_forecast(monkeypatch):

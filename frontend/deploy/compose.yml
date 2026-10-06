@@ -2,11 +2,13 @@ name: weather-frontend
 
 services:
   frontend:
-    build: .
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
     networks:
       - weather-local
-    environment:
-      BACKEND_URL: http://backend:8000
+    env_file:
+      - ../config/.env.docker
     ports:
       - "127.0.0.1:8501:8501"
     healthcheck:

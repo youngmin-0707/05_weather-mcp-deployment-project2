@@ -2,17 +2,14 @@ name: weather-backend
 
 services:
   backend:
-    build: .
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
     networks:
       - weather-local
-    environment:
-      WEATHER_MCP_URL: http://weather-mcp:8010/mcp
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
-      REDIS_URL: ${REDIS_URL:-}
-      DATABASE_URL: ${DATABASE_URL:-}
+    env_file:
+      - ../config/.env
+      - ../config/.env.docker
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:

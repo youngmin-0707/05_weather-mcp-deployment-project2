@@ -2,9 +2,13 @@ name: weather-mcp
 
 services:
   weather-mcp:
-    build: .
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
     networks:
       - weather-local
+    env_file:
+      - ../config/.env.docker
     ports:
       - "127.0.0.1:8010:8010"
     healthcheck:

@@ -7,7 +7,7 @@ LLM 응답만 Fake 함수로 교체하고, Backend Agent가 Tool Result를 응�
 
 from fastapi.testclient import TestClient
 
-import main as backend_app
+from src import main as backend_app
 
 
 async def fake_weather_tool(city: str, day: str) -> dict:
