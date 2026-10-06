@@ -7,7 +7,7 @@ LLM 응답만 Fake 함수로 교체하고, Backend Agent가 Tool Result를 응�
 
 from fastapi.testclient import TestClient
 
-import backend.main as backend_app
+import main as backend_app
 
 
 async def fake_weather_tool(city: str, day: str) -> dict:
@@ -50,10 +50,13 @@ def test_weather_agent_contract(monkeypatch) -> None:
 
 
 def test_dependency_health_reports_failed_connection(monkeypatch) -> None:
-    async def connection_refused(*_args, **_kwargs):
+    async def connection_refused(_url):
         raise ConnectionRefusedError("unreachable")
 
-    monkeypatch.setattr(backend_app.asyncio, "open_connection", connection_refused)
+    monkeypatch.setenv("REDIS_URL", "redis://127.0.0.1:16379/0")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:password@127.0.0.1:15432/db")
+    monkeypatch.setattr(backend_app, "check_redis", connection_refused)
+    monkeypatch.setattr(backend_app, "check_database", connection_refused)
     response = TestClient(backend_app.app).get("/health/dependencies")
 
     assert response.status_code == 503

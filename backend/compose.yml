@@ -11,10 +11,8 @@ services:
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
-      REDIS_HOST: aidevs-redis
-      REDIS_PORT: 6379
-      DB_HOST: aidevs-pgvector
-      DB_PORT: 5432
+      REDIS_URL: ${REDIS_URL:-}
+      DATABASE_URL: ${DATABASE_URL:-}
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:

@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-import mcp_server.main as main
+import main
 
 
 def test_get_weather_uses_forecast(monkeypatch):
