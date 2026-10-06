@@ -5,19 +5,12 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    networks:
-      - weather-local
     env_file:
       - ../config/.env.docker
     ports:
-      - "127.0.0.1:8501:8501"
+      - "8501:8501"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health')"]
       interval: 5s
       timeout: 3s
       retries: 10
-
-networks:
-  weather-local:
-    external: true
-    name: weather-local

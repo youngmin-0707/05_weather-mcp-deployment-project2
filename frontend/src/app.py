@@ -35,7 +35,7 @@ if page == "Weather Agent":
             st.error(f"Backend 요청 실패: {detail}")
 elif page == "구조 이해":
     st.code("Browser → Frontend → Backend Agent → Weather MCP → Open-Meteo\n                                  └→ OpenAI 또는 Gemini")
-    st.info("MCP 8010은 Docker 내부에서만 사용하며 Host에는 공개하지 않습니다.")
+    st.info("Backend와 Weather MCP는 서로 다른 EC2에서 통신합니다.")
 else:
     try:
         response = requests.get(f"{BACKEND_URL}/health/ready", timeout=5)
@@ -44,12 +44,3 @@ else:
         st.json(response.json())
     except requests.RequestException as error:
         st.error(f"Readiness 실패: {error}")
-    try:
-        dependencies = requests.get(f"{BACKEND_URL}/health/dependencies", timeout=12)
-        dependencies.raise_for_status()
-        st.success("Redis와 PostgreSQL TCP 연결이 확인되었습니다.")
-        st.json(dependencies.json())
-    except requests.RequestException as error:
-        st.warning(f"Redis/PostgreSQL 연결 확인 실패: {error}")
-        if error.response is not None:
-            st.json(error.response.json().get("detail", {}))
