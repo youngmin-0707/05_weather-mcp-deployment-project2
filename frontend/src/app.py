@@ -10,7 +10,7 @@ import streamlit as st
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 st.set_page_config(page_title="Weather MCP Agent", page_icon="🌦️", layout="wide")
-st.sidebar.title("학습 메뉴sss")
+st.sidebar.title("학습 메뉴_SON")
 page = st.sidebar.radio("이동", ["Weather Agent", "구조 이해", "Health Check"])
 st.title("Weather MCP Deployment Project OK")
 
