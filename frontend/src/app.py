@@ -35,7 +35,7 @@ if page == "Weather Agent":
             st.error(f"Backend 요청 실패: {detail}")
 elif page == "구조 이해":
     st.code("Browser → Frontend → Backend Agent → Weather MCP → Open-Meteo\n                                  └→ OpenAI 또는 Gemini")
-    st.info("Backend와 Weather MCP는 서로 다른 EC2에서 통신합니다.")
+    st.info("세 서비스는 같은 EC2의 Docker 네트워크에서 통신합니다.")
 else:
     try:
         response = requests.get(f"{BACKEND_URL}/health/ready", timeout=5)
