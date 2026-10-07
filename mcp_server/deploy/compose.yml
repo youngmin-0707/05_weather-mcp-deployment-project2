@@ -2,6 +2,8 @@ name: weather-mcp
 
 services:
   weather-mcp:
+    image: weather-mcp:latest
+    container_name: weather-mcp
     build:
       context: ..
       dockerfile: deploy/Dockerfile

@@ -2,6 +2,8 @@ name: weather-frontend
 
 services:
   frontend:
+    image: weather-frontend:latest
+    container_name: weather-frontend
     build:
       context: ..
       dockerfile: deploy/Dockerfile

@@ -48,6 +48,8 @@ Get-Content config/.env | ForEach-Object { if ($_ -match '^([A-Za-z_][A-Za-z0-9_
 
 세 Compose 프로젝트는 외부 Docker 네트워크 `weather-local`을 공유합니다. 로컬 Docker Desktop에서도 Backend의 `config/.env.docker`에 `WEATHER_MCP_URL=http://weather-mcp:8010/mcp`, Frontend의 `config/.env.docker`에 `BACKEND_URL=http://backend:8000`을 설정합니다.
 
+각 서비스의 컨테이너와 이미지는 `weather-mcp`, `weather-backend`, `weather-frontend`로 이름을 고정합니다. 루트의 이전 통합 Compose 구성은 제거했으며, 서비스별 `deploy/compose.yml`만 사용합니다.
+
 ```powershell
 docker network create weather-local  # 네트워크가 없을 때 처음 한 번
 docker compose -f mcp_server/deploy/compose.yml config --quiet
@@ -82,3 +84,5 @@ EC2에는 Docker Compose, `curl`, `flock`이 필요합니다. 첫 배포 전에 
 컨테이너 사이에서는 `weather-mcp:8010`과 `backend:8000`으로 통신합니다. Backend 8000과 MCP 8010은 EC2의 `127.0.0.1`에만 바인딩하고, Frontend 8501만 사용자에게 공개합니다. 보안 그룹에서 8501과 GitHub Actions Runner가 사용할 SSH 22의 접속을 허용하세요.
 
 최초 전환 전 기존 컨테이너가 8000 또는 8501을 점유하는지 `docker ps`로 확인하고, 기존 서비스를 확인한 뒤 해당 컨테이너만 중지하세요. 최초 배포는 MCP → Backend → Frontend 순서로 각 워크플로를 실행합니다. Backend 배포는 MCP readiness를, Frontend 배포는 Backend readiness를 확인합니다. 배포 후 Actions의 `deploy` Job과 `http://<EC2 주소>:8501`을 확인하세요. 실제 API 키를 서버 환경 파일에 넣어야 날씨 조회와 LLM 응답까지 동작합니다.
+
+배포 후 EC2에서 `docker ps -a`, `docker image ls`, `df -h /`로 컨테이너·이미지·디스크를 확인합니다. 이름 변경 전의 `weather-mcp-weather-mcp-1`, `weather-backend-backend-1`, `weather-frontend-frontend-1` 및 동일한 이름의 이미지는 새 서비스가 정상 작동하는 것을 확인한 뒤 정리할 수 있습니다. 배포 스크립트는 다른 프로젝트의 Docker 리소스를 자동으로 삭제하지 않습니다.
