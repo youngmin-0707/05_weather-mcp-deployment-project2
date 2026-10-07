@@ -48,18 +48,3 @@ def test_weather_agent_contract(monkeypatch) -> None:
     assert result["tool_result"]["city"] == "서울"
     assert result["model"] == "fake-model"
 
-
-def test_dependency_health_reports_failed_connection(monkeypatch) -> None:
-    async def connection_refused(_url):
-        raise ConnectionRefusedError("unreachable")
-
-    monkeypatch.setenv("REDIS_URL", "redis://127.0.0.1:16379/0")
-    monkeypatch.setenv("DATABASE_URL", "postgresql://user:password@127.0.0.1:15432/db")
-    monkeypatch.setattr(backend_app, "check_redis", connection_refused)
-    monkeypatch.setattr(backend_app, "check_database", connection_refused)
-    response = TestClient(backend_app.app).get("/health/dependencies")
-
-    assert response.status_code == 503
-    assert response.json()["detail"]["redis"]["status"] == "failed"
-    assert response.json()["detail"]["database"]["status"] == "failed"
-

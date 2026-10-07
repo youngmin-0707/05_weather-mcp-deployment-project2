@@ -18,8 +18,6 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 from openai import OpenAI
 from pydantic import BaseModel, Field
-import psycopg
-from redis.asyncio import Redis
 
 MCP_URL = os.getenv("WEATHER_MCP_URL", "http://127.0.0.1:8010/mcp")
 app = FastAPI(title="Weather MCP Agent", version="1.0.0")
@@ -72,44 +70,6 @@ async def ready() -> dict:
         raise HTTPException(status_code=503, detail=f"Weather MCP 연결 실패: {error}") from error
     return {"status": "ok", "mcp": MCP_URL, "tools": tools}
 
-
-async def check_redis(url: str) -> dict:
-    client = Redis.from_url(url, socket_connect_timeout=5, socket_timeout=5)
-    try:
-        await client.ping()
-        return {"status": "connected", "check": "PING"}
-    finally:
-        await client.aclose()
-
-
-async def check_database(url: str) -> dict:
-    async with await psycopg.AsyncConnection.connect(url, connect_timeout=5) as connection:
-        async with connection.cursor() as cursor:
-            await cursor.execute("SELECT 1")
-            row = await cursor.fetchone()
-    if row != (1,):
-        raise RuntimeError("PostgreSQL SELECT 1 returned an unexpected result")
-    return {"status": "connected", "check": "SELECT 1"}
-
-
-@app.get("/health/dependencies")
-async def dependencies() -> dict:
-    redis_url = os.getenv("REDIS_URL")
-    database_url = os.getenv("DATABASE_URL")
-    if not redis_url or not database_url:
-        raise HTTPException(status_code=503, detail="REDIS_URL and DATABASE_URL are required")
-    result = {}
-    for name, check, url in (
-        ("redis", check_redis, redis_url),
-        ("database", check_database, database_url),
-    ):
-        try:
-            result[name] = await check(url)
-        except Exception as error:
-            result[name] = {"status": "failed", "error": type(error).__name__}
-    if any(item["status"] != "connected" for item in result.values()):
-        raise HTTPException(status_code=503, detail=result)
-    return result
 
 @app.post("/api/weather")
 async def weather_agent(payload: WeatherRequest) -> dict:

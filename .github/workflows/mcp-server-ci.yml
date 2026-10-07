@@ -1,9 +1,10 @@
 name: MCP server CI
 on:
   push:
-    paths: ['mcp_server/**', '.github/workflows/mcp-server-ci.yml']
+    branches: [main]
+    paths: ['mcp_server/**', '.github/workflows/mcp-server-ci.yml', '.github/scripts/deploy.sh']
   pull_request:
-    paths: ['mcp_server/**', '.github/workflows/mcp-server-ci.yml']
+    paths: ['mcp_server/**', '.github/workflows/mcp-server-ci.yml', '.github/scripts/deploy.sh']
   workflow_dispatch:
 
 jobs:
@@ -25,3 +26,21 @@ jobs:
           cp config/.env.docker.example config/.env.docker
       - run: docker compose -f deploy/compose.yml config --quiet
       - run: docker compose -f deploy/compose.yml build
+
+  deploy:
+    needs: verify
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: MCP
+    concurrency:
+      group: deploy-mcp
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to EC2
+        env:
+          AWS_HOST: ${{ secrets.AWS_HOST }}
+          AWS_USER: ${{ secrets.AWS_USER }}
+          AWS_SSH_PRIVATE_KEY: ${{ secrets.AWS_SSH_PRIVATE_KEY }}
+          AWS_SSH_KNOWN_HOSTS: ${{ secrets.AWS_SSH_KNOWN_HOSTS }}
+        run: bash .github/scripts/deploy.sh mcp_server
